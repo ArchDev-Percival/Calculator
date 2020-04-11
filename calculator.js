@@ -7,34 +7,35 @@ function handleButtonClick(event){
     isOperatorClicked = isNaN(parseInt(buttonClicked));
 
     if (isOperatorClicked) {
-        handleSymbolClick(buttonClicked);
+        handleSymbolClick(buttonClicked, getScreenText());
         
     } else {
-        handleNumberClick(buttonClicked);
+        handleNumberClick(buttonClicked, getScreenText());
     }
 }
 
-function handleNumberClick(buttonClicked){
-    if (buttonClicked === "0" && getScreenText() === "0") {
+function handleNumberClick(buttonClicked, currentScreenText){
+    if (buttonClicked === "0" && currentScreenText === "0") {
 
         //don't update the screenbuffer for leading zeros
 
-    } else if (buttonClicked === "0" && getScreenText() !== "0") {
+    } else if (buttonClicked === "0" && currentScreenText !== "0") {
         
-        setScreenText(getScreenText() + buttonClicked);
+        setScreenText(currentScreenText + buttonClicked);
 
-    } else if (buttonClicked !== "0" && getScreenText() === "0") {
+    } else if (buttonClicked !== "0" && currentScreenText === "0") {
 
         setScreenText(buttonClicked);
 
-    } else if (buttonClicked !== "0" && getScreenText() !== "0") {
+    } else if (buttonClicked !== "0" && currentScreenText !== "0") {
 
-        setScreenText(getScreenText() + buttonClicked);
+        setScreenText(currentScreenText + buttonClicked);
 
     }
+    logState()
 }
 
-function handleSymbolClick(buttonClicked){
+function handleSymbolClick(buttonClicked, currentScreenText){
 
     switch(buttonClicked){
 
@@ -45,7 +46,6 @@ function handleSymbolClick(buttonClicked){
                 break;
             //character code for back-arrow
             case String.fromCharCode(8592):
-                currentScreenText = getScreenText();
                 if (currentScreenText.length === 1) {
                     setScreenText("0")
                 } else {
@@ -54,7 +54,7 @@ function handleSymbolClick(buttonClicked){
                 break;
             case "=":
                 if(previous_operator !== "") {
-                    setScreenText("" + doArithmeticOperation(previous_operator));
+                    setScreenText("" + doArithmeticOperation(runningTotal, previous_operator,parseInt(currentScreenText)));
                     previous_operator = "";
                     runningTotal = 0;
                 }
@@ -72,7 +72,7 @@ function handleSymbolClick(buttonClicked){
                 saveArithmeticOperator("×");
                 break;
     }
-
+    logState()
 }
 
 function saveArithmeticOperator(operator){
@@ -82,19 +82,19 @@ function saveArithmeticOperator(operator){
 
 }
 
-function doArithmeticOperation(operator){
+function doArithmeticOperation(firstOperand, operator, secondOperand){
     switch(operator){
         case "+":
-            return runningTotal + parseInt(getScreenText())
+            return firstOperand + secondOperand;
             break;
         case "-":
-            return runningTotal - parseInt(getScreenText())
+            return firstOperand - secondOperand;
             break;
         case "÷": 
-            return runningTotal / parseInt(getScreenText())
+            return firstOperand / secondOperand;
             break;
         case "×":
-            return runningTotal * parseInt(getScreenText())
+            return firstOperand * secondOperand;
             break;
     }
 }
@@ -107,4 +107,10 @@ function getScreenText(){
     return document.querySelector(".screen").innerText;
 }
 
-document.querySelector(".calc-buttons").addEventListener("click", handleButtonClick);
+function run() {
+    document.querySelector(".calc-buttons").addEventListener("click", handleButtonClick);
+}
+
+function logState(){
+    console.log(`Screen Text:${getScreenText()}\nPrevious Operator:${previous_operator}\nRunning Total:${runningTotal}`)
+}

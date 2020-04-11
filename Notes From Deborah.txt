@@ -1,0 +1,59 @@
+Unit tests / Integration do not typically test for DOM manipulation. 
+
+Getting started with TDD in JavaScript
+Packages
+Structuring Code for testing => Separate file and linking
+
+Jest - Tool
+Node.js
+
+Snapshot test 
+Testing that the view is updated correctly. 
+
+Tanspiler - Nodes modules working in the browser
+
+=> [research more] General axiom not a rule => If index.html downloads a script, the global namespace (window) 
+will have access to all the functions that were loaded. 
+
+Put DOM updates in functions to avoid raw manipulation
+Separate logic from Presentation. 
+
+Try to avoid coupling to the UI too much => Help in unit testing. Don't mock out too much while testing. 
+
+
+The UI is a supplier and displayer only. A view should not require too much testing. 
+
+get the data you need at a high level, don't get data from the view (?)
+
+Jasmine - Test runner
+
+write functions to manipulate inputs without relying on an external data source (like a view or a database)
+
+The core logic should be separate from the DOM. We will have functions that manipulate the DOM. Logic layer should be separate
+from the view layer. 
+ * Functions should be "pure"
+
+MVC - Patterns => MVC and JavaScript 
+
+Depending ont the JS framework used, the way we separate the logic from the presentation is different. 
+
+in Calculator we are using vanialla JS vanilla HTML. 
+
+Tests run in Node typically. 
+
+We are using the browser to run tests for this project. 
+
+Typically handlers **respond** to UI => Listen to Changes in the UI and then updates to UI
+
+If you have to break your head to write unittest, it means your code is not unittestable. 
+
+Code Smell => Doing too much mocking while testing
+
+Continue mocking exercise for logState
+
+refactor handleSymbolClick
+
+1. Write unit test for all code branches (path of code) for (handleSymbolClick and handleNumberClick)
+2. Refactor (handleSymbolClick and handleNumberClick) to return the value that the view needs to be updated with and refactor 
+associated tests
+3. Create a global state object rather than having global state variables. 

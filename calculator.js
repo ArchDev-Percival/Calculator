@@ -1,110 +1,139 @@
-let runningTotal = 0;
-let screenBuffer = "0";
-let previous_operator = "";
+//application state
 
-function handleButtonClick(event){
+let calcState = {
+    runningTotal:0,
+    screenBuffer: "0",
+    previous_operator: null
+};
+
+let DEFAULT_CALC_STATE = {
+    runningTotal:0,
+    screenBuffer: "0",
+    previousOperator: null
+};
+
+//application presentation
+function setScreenText(text) {
+    document.querySelector(".screen").innerText = text;
+}
+
+function getScreenText() {
+    return document.querySelector(".screen").innerText;
+}
+
+function handleButtonClick(event, currentCalcState){
     buttonClicked = event.target.innerText;
     isOperatorClicked = isNaN(parseInt(buttonClicked));
 
     if (isOperatorClicked) {
-        handleSymbolClick(buttonClicked);
+        calcState = Object.assign({}, handleSymbolClick(buttonClicked, calcState));
+        //console.log(calcState)
+        setScreenText(calcState.screenBuffer);
         
     } else {
-        handleNumberClick(buttonClicked);
+        calcState = Object.assign({}, handleNumberClick(buttonClicked, calcState));
+        //console.log(currentCalcState);
+        setScreenText(calcState.screenBuffer);
     }
 }
 
-function handleNumberClick(buttonClicked){
-    if (buttonClicked === "0" && getScreenText() === "0") {
+//application logic + presentation bridge/binding
+document.querySelector(".calc-buttons").addEventListener("click", handleButtonClick);
+
+//application logic
+function handleNumberClick(buttonClicked, currentCalcState){
+    
+    currentScreenText = currentCalcState.screenBuffer;
+
+    if (buttonClicked === "0" && currentScreenText === "0") {
 
         //don't update the screenbuffer for leading zeros
+        currentCalcState.screenBuffer = currentScreenText;
 
-    } else if (buttonClicked === "0" && getScreenText() !== "0") {
-        
-        setScreenText(getScreenText() + buttonClicked);
+    } else if (buttonClicked !== "0" && currentScreenText === "0") {
 
-    } else if (buttonClicked !== "0" && getScreenText() === "0") {
+        currentCalcState.screenBuffer = buttonClicked;
 
-        setScreenText(buttonClicked);
-
-    } else if (buttonClicked !== "0" && getScreenText() !== "0") {
-
-        setScreenText(getScreenText() + buttonClicked);
-
+    } else if (currentScreenText !== "0") {
+        currentCalcState.screenBuffer = currentScreenText + buttonClicked;
     }
+    //console.log(currentCalcState);
+    return Object.assign({}, currentCalcState);;
 }
 
-function handleSymbolClick(buttonClicked){
+function handleSymbolClick(buttonClicked, currentCalcState){
 
     switch(buttonClicked){
 
             case 'C':
-                setScreenText("0");
-                previous_operator = "";
-                runningTotal = 0;
+                currentCalcState = Object.assign({}, DEFAULT_CALC_STATE);
                 break;
             //character code for back-arrow
             case String.fromCharCode(8592):
-                currentScreenText = getScreenText();
-                if (currentScreenText.length === 1) {
-                    setScreenText("0")
+                if (currentCalcState.screenBuffer.length === 1) {
+        
+                    currentCalcState.screenBuffer = DEFAULT_CALC_STATE.screenBuffer;
+
                 } else {
-                    setScreenText(currentScreenText.substr(0,currentScreenText.length - 1))
+
+                    currentScreenText = currentCalcState.screenBuffer
+                    currentScreenText = currentScreenText.substr(0,currentScreenText.length - 1)
+                    currentCalcState.screenBuffer = currentScreenText;
                 }
                 break;
             case "=":
-                if(previous_operator !== "") {
-                    setScreenText("" + doArithmeticOperation(previous_operator));
-                    previous_operator = "";
-                    runningTotal = 0;
+                if(currentCalcState.previousOperator !== "") {
+
+                    currentCalcState = doArithmeticOperation(currentCalcState);
                 }
                 break;
             case "+":
-                saveArithmeticOperator("+");
+                return saveArithmeticOperator("+", currentCalcState);
                 break;
             case "-":
-                saveArithmeticOperator("-");
+                return saveArithmeticOperator("-", currentCalcState);
                 break;
             case "÷": 
-                saveArithmeticOperator("÷");
+                return saveArithmeticOperator("÷", currentCalcState);
                 break;
             case "×":
-                saveArithmeticOperator("×");
+                return saveArithmeticOperator("×", currentCalcState);
                 break;
     }
-
+    console.log(currentCalcState);
+    return Object.assign({}, currentCalcState);
 }
 
-function saveArithmeticOperator(operator){
-    previous_operator = operator
-    runningTotal = parseInt(getScreenText());
-    setScreenText("0");
+function saveArithmeticOperator(operator, currentCalcState){
+    currentCalcState.previousOperator = operator;
+    currentCalcState.runningTotal = parseInt(currentCalcState.screenBuffer);
+    currentCalcState.screenBuffer = DEFAULT_CALC_STATE.screenBuffer;
+    //console.log(currentCalcState);
+    return Object.assign({}, currentCalcState);
 
 }
+ 
+function doArithmeticOperation(currentCalcState){
+    operator = currentCalcState.previousOperator;
+    firstOperand = parseInt(currentCalcState.runningTotal);
+    secondOperand = parseInt(currentCalcState.screenBuffer);
 
-function doArithmeticOperation(operator){
+    currentCalcState = Object.assign({}, DEFAULT_CALC_STATE);
+    
     switch(operator){
         case "+":
-            return runningTotal + parseInt(getScreenText())
+            currentCalcState.screenBuffer = "" + (firstOperand + secondOperand);
             break;
         case "-":
-            return runningTotal - parseInt(getScreenText())
+            currentCalcState.screenBuffer = "" + (firstOperand - secondOperand);
             break;
         case "÷": 
-            return runningTotal / parseInt(getScreenText())
+            currentCalcState.screenBuffer = "" + (firstOperand / secondOperand);
             break;
         case "×":
-            return runningTotal * parseInt(getScreenText())
+            currentCalcState.screenBuffer = "" + (firstOperand * secondOperand);
             break;
     }
+    //console.log(currentCalcState);
+    return Object.assign({}, currentCalcState);
 }
-
-function setScreenText(updatedScreenBuffer) {
-    document.querySelector(".screen").innerText = updatedScreenBuffer;
-}
-
-function getScreenText(){
-    return document.querySelector(".screen").innerText;
-}
-
-document.querySelector(".calc-buttons").addEventListener("click", handleButtonClick);
